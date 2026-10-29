@@ -445,6 +445,21 @@ chatIn.addEventListener('keydown', e => {
   e.stopPropagation();
 });
 
+// ==================== 离线观光 ====================
+function startSolo(name) {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('hud').classList.add('on');
+  const sp = { x: 0, z: 0 };
+  addPlayer({ id: 1, name, x: sp.x, z: sp.z, ry: 0 }, true);
+  addChat('sys', `离线观光模式：${esc(name)}，欢迎来到这个世界`);
+  addChat('sys', '这里没有别的玩家，随便走走看看');
+  setConn('离线模式', '');
+  document.getElementById('iOnline').textContent = '1（离线）';
+  refreshOnline = () => {};
+  send = () => {};
+  document.getElementById('tips').textContent = '离线观光 · WASD 移动 · Shift 奔跑 · 鼠标拖动转视角';
+}
+
 // ==================== UI ====================
 function setConn(text, cls) {
   const el = document.getElementById('conn');
@@ -463,6 +478,12 @@ document.getElementById('go').onclick = () => {
   document.getElementById('loading').classList.add('on');
   connect(n);
   setTimeout(() => document.getElementById('loading').classList.remove('on'), 1200);
+};
+
+// 离线观光：不连服务器，本地造一个玩家
+document.getElementById('solo').onclick = () => {
+  const n = document.getElementById('name').value.trim() || '旅人';
+  startSolo(n);
 };
 document.getElementById('name').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('go').click();
