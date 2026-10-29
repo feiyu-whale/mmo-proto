@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>浏览器 3D MMO 原型 · 肥鱼</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0b0f1a;color:#e8e6f0;
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;user-select:none}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+
+  /* 登录层 */
+  #login{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 40%,#1b2740,#070a12);z-index:20}
+  #login h1{font-size:26px;color:#8fd8ff;margin-bottom:6px;letter-spacing:1px}
+  #login p{font-size:12.5px;color:#7b8aa8;margin-bottom:18px}
+  #name{width:230px;padding:10px 14px;border-radius:10px;border:1.5px solid #2c3c5c;background:#121a2c;
+    color:#e8e6f0;font-size:14px;outline:none;text-align:center}
+  #name:focus{border-color:#4a7fd8}
+  #go{margin-top:14px;padding:10px 34px;border-radius:22px;border:none;cursor:pointer;
+    background:linear-gradient(180deg,#5aa8ff,#2f6fd0);color:#fff;font-size:14px;font-weight:700;
+    box-shadow:0 4px 0 #00000044}
+  #go:active{transform:translateY(2px);box-shadow:0 2px 0 #00000044}
+  #hint{margin-top:14px;font-size:11px;color:#5a6a88;line-height:1.7;text-align:center}
+
+  /* HUD */
+  #hud{position:absolute;inset:0;pointer-events:none;display:none;z-index:10}
+  #hud.on{display:block}
+  .panel{position:absolute;background:rgba(10,16,28,.78);border:1px solid #2a3a58;border-radius:10px;
+    padding:8px 12px;font-size:12px;backdrop-filter:blur(6px)}
+  #info{left:12px;top:12px;min-width:150px}
+  #info .row{display:flex;justify-content:space-between;gap:14px;line-height:1.9}
+  #info .k{color:#6d7f9e}
+  #info .v{color:#8fd8ff;font-weight:600}
+  #chatbox{right:12px;top:12px;width:260px;max-height:230px;overflow-y:auto;
+    display:flex;flex-direction:column;gap:3px;background:rgba(10,16,28,.55);border:none}
+  #chatbox div{font-size:12px;line-height:1.5;word-break:break-all}
+  #chatbox .who{color:#8fd8ff}
+  #chatbox .sys{color:#ffcf7a}
+  #chatIn{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+    width:min(420px,80%);padding:9px 14px;border-radius:20px;border:1.5px solid #2c3c5c;
+    background:rgba(18,26,44,.92);color:#e8e6f0;font-size:13px;outline:none;display:none;pointer-events:auto}
+  #chatIn.on{display:block}
+  #cross{position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;
+    border-radius:50%;background:#ffffff66}
+  #ver{position:absolute;right:8px;bottom:6px;font-size:10px;color:#ffffff33;pointer-events:none}
+  #tips{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:11.5px;color:#5a6a88;
+    pointer-events:none;text-align:center;line-height:1.7}
+  #conn{position:absolute;right:12px;bottom:28px;font-size:11px;color:#5a6a88}
+  #conn.ok{color:#4be08a}
+  #conn.bad{color:#ff6b6b}
+
+  /* 加载 */
+  #loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    background:#070a12ee;z-index:30;font-size:13px;color:#8fd8ff}
+  #loading.on{display:flex}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="login">
+    <h1>🌍 3D MMO 原型</h1>
+    <p>浏览器里跑一个联机世界 · 技术验证</p>
+    <input id="name" maxlength="16" placeholder="起个名字" autocomplete="off">
+    <button id="go">进入世界</button>
+    <div id="hint">WASD 移动 · 鼠标拖动转视角 · 回车聊天<br>滚轮拉近拉远 · Shift 奔跑</div>
+  </div>
+
+  <div id="hud">
+    <div class="panel" id="info">
+      <div class="row"><span class="k">在线</span><span class="v" id="iOnline">0</span></div>
+      <div class="row"><span class="k">坐标</span><span class="v" id="iPos">0, 0</span></div>
+      <div class="row"><span class="k">延迟</span><span class="v" id="iPing">-</span></div>
+    </div>
+    <div class="panel" id="chatbox"></div>
+    <input id="chatIn" maxlength="120" placeholder="说点什么…（回车发送，Esc 取消）">
+    <div id="cross"></div>
+    <div id="tips">WASD 移动 · Shift 奔跑 · 回车聊天</div>
+    <div id="conn">未连接</div>
+    <div id="ver">v1.0.0-MMO原型 20261029</div>
+  </div>
+
+  <div id="loading">正在生成世界…</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module" src="client.js"></script>
+</body>
+</html>
